@@ -1,9 +1,22 @@
 {
     "id" : "RailNetwork",
     "version" : "0.1.0-SNAPSHOT",
-    "author" : "",
+    "author" : "NicholasBatesNZ",
     "displayName" : "RailNetwork",
-    "description" : "",
-    "dependencies" : [],
+    "description" : "A world generator plugin to add rail networks",
+    "dependencies" : [
+        {
+            "id" : "Core",
+            "minVersion" : "1.0.0"
+        },
+        {
+            "id" : "Rails",
+            "minVersion" : "0.3.0"
+        },
+        {
+            "id" : "SegmentedPaths",
+            "minVersion" : "0.1.0"
+        }
+    ],
     "serverSideOnly" : false
 }
