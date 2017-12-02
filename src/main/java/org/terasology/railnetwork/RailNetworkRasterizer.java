@@ -54,8 +54,9 @@ public class RailNetworkRasterizer implements WorldRasterizerPlugin {
         for (Vector3i position : chunkRegion.getRegion()) {
             float surfaceHeight = surfaceHeightFacet.getWorld(position.x, position.z);
 
-            if (position.y > seaLevel && position.y == surfaceHeight + 1 && position.x == 1 && position.z == 1) {
+            if (position.y > seaLevel && position.y == surfaceHeight + 1) {
                 chunk.setBlock(ChunkMath.calcBlockPos(position), railFamily.getBlockByConnection(SideBitFlag.getSides(Side.LEFT, Side.RIGHT)));
+                break;
             }
         }
     }
