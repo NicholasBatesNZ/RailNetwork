@@ -21,12 +21,7 @@ import org.terasology.math.SideBitFlag;
 import org.terasology.math.geom.Vector3i;
 import org.terasology.minecarts.blocks.RailsUpdateFamily;
 import org.terasology.registry.CoreRegistry;
-import org.terasology.registry.In;
-import org.terasology.segmentedpaths.blocks.PathFamily;
-import org.terasology.world.block.Block;
 import org.terasology.world.block.BlockManager;
-import org.terasology.world.block.BlockUri;
-import org.terasology.world.block.family.BlockFamily;
 import org.terasology.world.chunks.CoreChunk;
 import org.terasology.world.generation.Region;
 import org.terasology.world.generation.WorldRasterizerPlugin;
@@ -38,6 +33,7 @@ import org.terasology.world.generator.plugin.RegisterPlugin;
 public class RailNetworkRasterizer implements WorldRasterizerPlugin {
 
     private RailsUpdateFamily railFamily;
+    private int railsPlaced = 0;
 
     @Override
     public void initialize() {
@@ -51,11 +47,14 @@ public class RailNetworkRasterizer implements WorldRasterizerPlugin {
         SeaLevelFacet seaLevelFacet = chunkRegion.getFacet(SeaLevelFacet.class);
         int seaLevel = seaLevelFacet.getSeaLevel();
 
+        Vector3i firstRail = new Vector3i();
+
         for (Vector3i position : chunkRegion.getRegion()) {
             float surfaceHeight = surfaceHeightFacet.getWorld(position.x, position.z);
-
-            if (position.y > seaLevel && position.y == surfaceHeight + 1) {
+            firstRail = position;
+            if (position.y > seaLevel && position.y == surfaceHeight + 1 && railsPlaced < 1) {
                 chunk.setBlock(ChunkMath.calcBlockPos(position), railFamily.getBlockByConnection(SideBitFlag.getSides(Side.LEFT, Side.RIGHT)));
+                railsPlaced++;
                 break;
             }
         }
