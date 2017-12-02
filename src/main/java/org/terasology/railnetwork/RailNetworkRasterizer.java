@@ -16,11 +16,14 @@
 package org.terasology.railnetwork;
 
 import org.terasology.math.ChunkMath;
+import org.terasology.math.Region3i;
 import org.terasology.math.Side;
 import org.terasology.math.SideBitFlag;
+import org.terasology.math.geom.BaseVector3i;
 import org.terasology.math.geom.Vector3i;
 import org.terasology.minecarts.blocks.RailsUpdateFamily;
 import org.terasology.registry.CoreRegistry;
+import org.terasology.world.block.Block;
 import org.terasology.world.block.BlockManager;
 import org.terasology.world.chunks.CoreChunk;
 import org.terasology.world.generation.Region;
@@ -29,33 +32,35 @@ import org.terasology.world.generation.facets.SeaLevelFacet;
 import org.terasology.world.generation.facets.SurfaceHeightFacet;
 import org.terasology.world.generator.plugin.RegisterPlugin;
 
+import java.util.Map;
+
 @RegisterPlugin
 public class RailNetworkRasterizer implements WorldRasterizerPlugin {
 
     private RailsUpdateFamily railFamily;
-    private int railsPlaced = 0;
+    private Block brick, air;
 
     @Override
     public void initialize() {
         railFamily = (RailsUpdateFamily) CoreRegistry.get(BlockManager.class).getBlockFamily("Rails:rails");
+        brick = CoreRegistry.get(BlockManager.class).getBlock("Core:Brick");
+        air = CoreRegistry.get(BlockManager.class).getBlock("Rails:rails");
     }
 
     @Override
     public void generateChunk(CoreChunk chunk, Region chunkRegion) {
 
-        SurfaceHeightFacet surfaceHeightFacet = chunkRegion.getFacet(SurfaceHeightFacet.class);
-        SeaLevelFacet seaLevelFacet = chunkRegion.getFacet(SeaLevelFacet.class);
-        int seaLevel = seaLevelFacet.getSeaLevel();
+        RailNetworkFacet railNetworkFacet = chunkRegion.getFacet(RailNetworkFacet.class);
 
-        Vector3i firstRail = new Vector3i();
+        for (Map.Entry<BaseVector3i, RailNetwork> entry : railNetworkFacet.getWorldEntries().entrySet()) {
+            Vector3i position = new Vector3i(entry.getKey()).addY(2);
 
-        for (Vector3i position : chunkRegion.getRegion()) {
-            float surfaceHeight = surfaceHeightFacet.getWorld(position.x, position.z);
-            firstRail = position;
-            if (position.y > seaLevel && position.y == surfaceHeight + 1 && railsPlaced < 1) {
-                chunk.setBlock(ChunkMath.calcBlockPos(position), railFamily.getBlockByConnection(SideBitFlag.getSides(Side.LEFT, Side.RIGHT)));
-                railsPlaced++;
-                break;
+            position.addX(-16);
+            for (int i = 0; i < 32; i++) {
+                chunk.setBlock(ChunkMath.calcBlockPos(position.addX(1)), railFamily.getBlockByConnection(SideBitFlag.getSides(Side.LEFT, Side.RIGHT)));
+                chunk.setBlock(ChunkMath.calcBlockPos(position.addY(1)), air);
+                chunk.setBlock(ChunkMath.calcBlockPos(position.addY(1)), brick);
+                position.addY(-2);
             }
         }
     }
